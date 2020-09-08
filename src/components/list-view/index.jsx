@@ -1,48 +1,48 @@
 import React from 'react';
-import PropTypes from 'prop-types';
+import { useQuery } from '@apollo/client';
+import Loader from 'react-loader-spinner';
 
 import styles from './styles.module.scss'
 
+import { PUBLIC_REPO_SEARCH } from '../../graphql/queries';
 import ListItem from '../list-item';
 
-function ListView({ listData, onItemClick }) {
+
+function ListView() {
+  const { loading, error, data } = useQuery(PUBLIC_REPO_SEARCH);
+
+  if (loading) return (
+    <Loader
+      type="TailSpin"
+      color="#00bdb3"
+      secondaryColor="#ffffff"
+      width={80}
+      height={80}
+    />
+  )
+
+  if (error) return (
+    <>
+      <h2>Error</h2>
+      <p>{error.toString()}</p>
+    </>
+  )
+
   return (
     <ul className={styles.list}>
       {
-        listData.map(listItemData => (
-          <li
-            className={styles['list-item']}
+        data.search.nodes.map(listItemData => (
+          <ListItem
             key={listItemData.id}
-          >
-            <ListItem
-              name={listItemData.name}
-              description={listItemData.description}
-              image={listItemData.openGraphImageUrl}
-              user={listItemData.owner.login}
-              onClick={() => { onItemClick(listItemData.name, listItemData.owner.login) }}
-            />
-          </li>
+            name={listItemData.name}
+            description={listItemData.description}
+            image={listItemData.openGraphImageUrl}
+            user={listItemData.owner.login}
+          />
         ))
       }
     </ul>
   )
-}
-
-ListView.propTypes = {
-  onItemClick: PropTypes.func,
-  listData: PropTypes.arrayOf(PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    name: PropTypes.string,
-    description: PropTypes.string,
-    openGraphImageUrl: PropTypes.string,
-    owner: PropTypes.shape({
-      login: PropTypes.string,
-    })
-  })).isRequired,
-};
-
-ListView.defaultProps = {
-  onItemClick: () => {},
 }
 
 export default ListView;

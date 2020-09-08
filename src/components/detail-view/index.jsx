@@ -1,103 +1,84 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import cn from 'classnames';
-
+import { useQuery } from '@apollo/client';
+import Loader from 'react-loader-spinner';
+import { REPO_DATA } from '../../graphql/queries';
 import styles from './styles.module.scss';
 
-function DetailView({ visible, data, onClose }) {
-  return (
-    <div
-      className="modal"
-      style={{
-        display: visible ? 'block' : 'none',
-      }}
-    >
-      <div className="modal-background" onClick={onClose} />
-      <div className="modal-card">
-        <header className="modal-card-head">
-          <p className="modal-card-title">
-            { data ? `${data.name} @${data.owner.login}` : 'Loading' }
-          </p>
-          <button
-            className="delete"
-            aria-label="close"
-            onClick={onClose}
-          />
-        </header>
-        <section
-          className={cn(
-            'modal-card-body',
-            styles['modal-card-body']
-          )}
-        >
-          {
-            data
-            ? (
-              <>
-                <img
-                  src={data.openGraphImageUrl}
-                  alt="OpenGraph"
-                  className={styles.image}
-                />
-                <p class="subtitle is-4">Description:</p>
-                <p>{data.description}</p>
-                <p class="subtitle is-4">Assignable Users:</p>
-                <ul>
-                  {
-                    data.assignableUsers.nodes.map(user => (
-                      <li key={user.id}>
-                        <a
-                          href={user.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="link"
-                        >
-                          {user.name}
-                        </a>
-                      </li>
-                    ))
-                  }
-                </ul>
-                <a
-                  className="button"
-                  href={data.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  View on github.com
-                </a>
-              </>
-            )
-            : 'Loading'
-          }
-        </section>
-        <footer className="modal-card-foot">
-          { !data && (
-            <progress className="progress is-small is-primary" max="100" />
-          )}
-        </footer>
-      </div>
+function DetailView({ repoName, ownerLogin }) {
+  const { loading, data, error } = useQuery(REPO_DATA, {
+    variables: {
+      repoName,
+      ownerLogin,
+      lastAssignableUsers: 20,
+    }
+  });
+
+  if (loading) return (
+    <div className={styles['loader']}>
+      <Loader
+        type="TailSpin"
+        color="#00bdb3"
+        secondaryColor="#ffffff"
+        width={80}
+        height={80}
+      />
     </div>
   )
+
+  if (error) return (
+    <div>
+      <h2>Error</h2>
+      <p>{error.toString()}</p>
+    </div>
+  )
+
+  return (
+    <div className={styles['detail-view']}>
+      <h3>Created at:</h3>
+      <p>{data.repository.createdAt}</p>
+      {
+        data.repository.releases.nodes[0] && (
+          <>
+            <h3>Latest Release:</h3>
+            <p>{data.repository.releases.nodes[0].name}</p>
+          </>
+        )
+      }
+      <h3>Assignable Users:</h3>
+      <ul className={styles.list}>
+        {
+          data.repository.assignableUsers.nodes.map(user => (
+            <li key={user.id}>
+              <a
+                className={styles.link}
+                href={user.url}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <strong>{user.name}</strong>
+                <small>@{user.login}</small>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+      <br />
+      <a
+        className={styles.button}
+        href={data.repository.url}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        View it on Github
+      </a>
+    </div>
+  );
 }
 
 DetailView.propTypes = {
-  visible: PropTypes.bool,
-  onClose: PropTypes.func,
-  data: PropTypes.shape({
-    name: PropTypes.string,
-    createdAt: PropTypes.string,
-    description: PropTypes.string,
-    owner: PropTypes.shape({
-      login: PropTypes.string,
-    }),
-    assignableUsers: PropTypes.object,
-  }),
-}
-
-DetailView.defaultProps = {
-  visible: false,
-  onClose: () => {},
+  repoName: PropTypes.string.isRequired,
+  ownerLogin: PropTypes.string.isRequired,
 }
 
 export default DetailView;
