@@ -41,7 +41,7 @@ function DetailView({ repoName, ownerLogin }) {
         data.repository.releases.nodes[0] && (
           <>
             <h3>Latest Release:</h3>
-            <p>{data.repository.releases.nodes[0].name}</p>
+            <p>{data.repository.releases.nodes[0].tagName}</p>
           </>
         )
       }

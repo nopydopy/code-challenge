@@ -9,7 +9,7 @@ const REPO_DATA = gql`
       diskUsage
       releases(last: 1) {
         nodes {
-          name
+          tagName
         }
       }
       assignableUsers(last: $lastAssignableUsers) {
