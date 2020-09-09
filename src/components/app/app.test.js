@@ -1,9 +1,18 @@
 import React from 'react';
-import { render } from '@testing-library/react';
+import { shallow } from 'enzyme';
 import App from './index';
+import ListView from '../list-view';
 
-test('renders learn react link', () => {
-  const { getByText } = render(<App />);
-  const linkElement = getByText(/learn react/i);
-  expect(linkElement).toBeInTheDocument();
-});
+
+describe('<App>', () => {
+  it('renders a h1 headline and only one h1 element', () => {
+    const wrapper = shallow(<App />);
+    expect(wrapper.find('h1')).toHaveLength(1);
+  });
+
+  it('renders a ListView component', () => {
+    const wrapper = shallow(<App />);
+    expect(wrapper.find(ListView)).toHaveLength(1);
+  });
+})
+

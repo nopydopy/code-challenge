@@ -7,13 +7,9 @@
   max-width: 800px;
   height: 100%;
   padding: 24px;
-  background-color: rgba(0, 0, 0, 0);
   overflow-x: hidden;
   overflow-y: scroll;
-  
-  &--is-loading {
-    background-color: rgba(0, 0, 0, 0.5);
-  }
+  background-color: rgba(0, 0, 0, 0.2);
 }
 
 .list {

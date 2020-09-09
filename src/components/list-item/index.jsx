@@ -13,6 +13,9 @@ function ListItem({ name, description, user, image }) {
   const [isDetailView, setIsDetailView] = useState(false);
 
   useEffect(() => {
+    // Change descriptionText length based on DetailView visiblity
+    // Show full length description when DetailView is visible and
+    // trim description when its not.
     let text = description;
     if ((description && description.length > 50) && !isDetailView) {
       text = `${description.substring(0, 50)}...`;
@@ -39,6 +42,7 @@ function ListItem({ name, description, user, image }) {
   }
 
   function closeDetailView() {
+    if (!isDetailView) return;
     const { top, left } = rootEl.current.getBoundingClientRect();
     gsap.to(detailViewBgEl.current, { opacity: 0, duration: 0.33 });
     gsap.to(articleEl.current, {
